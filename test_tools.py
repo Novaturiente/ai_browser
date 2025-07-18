@@ -17,19 +17,20 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 global latest_source
 latest_source = ""
 
-
 def browser_webpage(url: str) -> str:
     """Open a url and get contents of the page"""
     print(f"Opening {url}")
     global latest_source
     driver.get(url)
+    link = driver.current_url
     html_data = driver.page_source
-    latest_source = BeautifulSoup(html_data, "lxml")
+    soup = BeautifulSoup(html_data, "lxml")
+    latest_source = f"url: {link}\n\nSource: {soup}"
 
     return f"opened {url} and updated Latest source"
 
 
-def input_text(element: str, text: str) -> str:
+def input_text(locator: str, element: str, text: str) -> str:
     """Input text to a field in the webpage"""
     print("Input")
     wait = WebDriverWait(driver, 10)
@@ -39,7 +40,7 @@ def input_text(element: str, text: str) -> str:
     return f"filled {element} with {text}"
 
 
-def click_on_element(element: str) -> str:
+def click_on_element(locator: str, element: str) -> str:
     """Click on the given element in the webpage"""
     print("click")
     wait = WebDriverWait(driver, 10)
@@ -54,8 +55,10 @@ def get_current_status() -> str:
     """Get current source of the webpage"""
     print("update")
     global latest_source
+    link = driver.current_url
     html_data = driver.page_source
-    latest_source = BeautifulSoup(html_data, "lxml")
+    soup = BeautifulSoup(html_data, "lxml")
+    latest_source = f"url: {link}\n\nSource: {soup}"
 
     return "Updated Latest source"
 
@@ -81,16 +84,20 @@ tool_list = [
         "parameters": {
             "type": "object",
             "properties": {
+                "locator": {
+                    "type": "string",
+                    "description": "locator to select the element by",
+                },
                 "element": {
                     "type": "string",
-                    "description": "XPATH for the input field element",
+                    "description": "Selector for the input field element",
                 },
                 "text": {
                     "type": "string",
                     "description": "text to enter in the field",
                 },
             },
-            "required": ["element", "text"],
+            "required": ["locator","element", "text"],
         },
     },
     {
@@ -99,12 +106,16 @@ tool_list = [
         "parameters": {
             "type": "object",
             "properties": {
+                "locator": {
+                    "type": "string",
+                    "description": "locator to select the element by",
+                },
                 "element": {
                     "type": "string",
                     "description": "XPATH for the element to click",
                 },
             },
-            "required": ["element"],
+            "required": ["locator","element"],
         },
     },
     {
@@ -120,3 +131,4 @@ tool_map = {
     "click_on_element": click_on_element,
     "get_current_status": get_current_status,
 }
+
